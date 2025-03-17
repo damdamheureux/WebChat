@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+    :root {
+        --primary-color: #6c8eff; /* Bleu plus visible sur fond sombre */
+        --secondary-color: #8e9ba7;
+        --background-dark: #1a1a1a;
+        --card-dark: #2d2d2d;
+        --text-light: #e0e0e0;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        --transition-speed: 0.3s;
+        --accent-color: #f26522;
+    }
+
+    body {
+        background-color: var(--background-dark);
+        color: var(--text-light);
+    }
+
+    .room {
+        background-color: var(--card-dark);
+        border: 1px solid #3d3d3d;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    }
+
+    .room:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .room h2 {
+        margin-top: 0;
+        color: var(--primary-color);
+    }
+
+    .room p {
+        color: var(--secondary-color);
+    }
+
+    /* Styles du bouton modifiÃ© */
+    .button-entry {
+        background: #2d2d2d;
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 0.8em;
+    }
+
+    .button-entry a {
+        color: white;
+        padding: 0.4em 1em;
+        min-width: 150px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid transparent;
+        position: relative;
+        cursor: pointer;
+        letter-spacing: 0.07em;
+        text-decoration: none;
+    }
+
+    .button-entry .text {
+        font-family: proxima-nova, monospace;
+        padding: 0 0.3em;
+        line-height: 1;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .button-entry a::after {
+        position: absolute;
+        content: '';
+        bottom: -2px;
+        left: 1em;
+        right: 1em;
+        height: 2px;
+        background: var(--accent-color);
+        transition: 
+            transform 0.8s cubic-bezier(1,0,.37,1) 0.2s,
+            right 0.2s cubic-bezier(.04,.48,0,1) 0.6s,
+            left 0.4s cubic-bezier(.04,.48,0,1) 0.6s;
+        transform-origin: left;
+    }
+
+    .button-entry .line {
+        position: absolute;
+        background: var(--accent-color);
+    }
+
+    .button-entry .line.-right,
+    .button-entry .line.-left {
+        width: 2px;
+        bottom: -2px;
+        top: -2px;
+        transform: scale3d(1,0,1);
+    }
+
+    .button-entry .line.-top,
+    .button-entry .line.-bottom {
+        height: 2px;
+        left: -2px;
+        right: -2px;
+        transform: scale3d(0,1,1);
+    }
+
+    .button-entry .line.-right {
+        right: -2px;
+        transition: transform 0.1s cubic-bezier(1,0,.65,1.01) 0.23s;
+        transform-origin: top;
+    }
+
+    .button-entry .line.-top {
+        top: -2px;
+        transition: transform 0.08s linear 0.43s;
+        transform-origin: left;
+    }
+
+    .button-entry .line.-left {
+        left: -2px;
+        transition: transform 0.08s linear 0.51s;
+        transform-origin: bottom;
+    }
+
+    .button-entry .line.-bottom {
+        bottom: -2px;
+        transition: transform 0.3s cubic-bezier(1,0,.65,1.01);
+        transform-origin: right;
+    }
+
+    .button-entry a:hover::after,
+    .button-entry a:active::after {
+        transform: scale3d(0,1,1);
+        right: -2px;
+        left: -2px;
+        transform-origin: right;
+        transition: 
+            transform 0.2s cubic-bezier(1,0,.65,1.01) 0.17s,
+            right 0.2s cubic-bezier(1,0,.65,1.01),
+            left 0s 0.3s;
+    }
+
+    .button-entry a:hover .line,
+    .button-entry a:active .line {
+        transform: scale3d(1,1,1);
+    }
+
+    .button-entry a:hover .line.-right,
+    .button-entry a:active .line.-right {
+        transition: transform 0.1s cubic-bezier(1,0,.65,1.01) 0.2s;
+        transform-origin: bottom;
+    }
+
+    .button-entry a:hover .line.-top,
+    .button-entry a:active .line.-top {
+        transition: transform 0.08s linear 0.4s;
+        transform-origin: right;
+    }
+
+    .button-entry a:hover .line.-left,
+    .button-entry a:active .line.-left {
+        transition: transform 0.08s linear 0.48s;
+        transform-origin: top;
+    }
+
+    .button-entry a:hover .line.-bottom,
+    .button-entry a:active .line.-bottom {
+        transition: transform 0.5s cubic-bezier(0,.53,.29,1) 0.56s;
+        transform-origin: left;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Rooms</h1>
+<div class="btn-group" role="group" aria-label="Basic example">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Créer une salle</button>
+    
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#joinroomModal">Rejointre une salle</button> 
+  </div>
+  {% for room in rooms %}
+  <div class="room">
+      <h2>{{room}}</h2>
+      <p>Description of Room 1</p>
+      <section class="button-entry">
+          <a class="join-room">
+              <span class="text">Rejoindre la room</span>
+              <span class="line -right"></span>
+              <span class="line -top"></span>
+              <span class="line -left"></span>
+              <span class="line -bottom"></span>
+            </a>
+        </section>
+    </div>
+    {% endfor %}
+
+    <div class="modal fade" id="joinroomModal" tabindex="-1" aria-labelledby="joinroomLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="joinroomLabel">Rejoindre une salle</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="join_room_form">
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="roomid" class="form-label">ID de la salle</label>
+                    <input type="number" class="form-control" name="roomid" id="roomid" required placeholder=79>
+                  </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-success" data-bs-dismiss="modal">Rejoindre la salle</button>
+            </div>
+        </form>
+          </div>
+        </div>
+      </div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Créer une salle</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="create_room_form">
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="RoomName" class="form-label">Nom de la salle</label>
+                <input type="text" class="form-control" name="roomname" id="RoomName" minlength="4" maxlength="32" placeholder="Vacances à la plage">
+              </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Créer la salle</button>
+        </div>
+    </form>
+      </div>
+    </div>
+  </div>
+
+<script>
+    document.getElementById("join_room_form").addEventListener("submit", async function(event) {
+        console.log("le join room a été lancé")
+        event.preventDefault();
+        const formData = new FormData(this);
+        const params = new URLSearchParams(formData).toString();
+        console.log(params)
+        try {
+            const response = await fetch(`/join_room?${params}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la connexion');
+            }
+            const data = await response.json();
+            const roomId = data.room_id;
+            window.location.href = `/rooms/${roomId}`;
+            // location.href = response.json()["room_id"]
+           // window.location.href = '/rooms';
+        } catch (error) {
+            alert('La salle n\'existe pas');
+        }
+    });
+    document.getElementById('create_room_form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const params = new URLSearchParams(formData).toString();
+        console.log(params)
+        try {
+            const response = await fetch(`/create_room?${params}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la connexion');
+            }
+            const data = await response.json();
+            const roomId = data.room_id;
+            setTimeout(function(){
+                window.location.href = `/rooms/${roomId}`;
+            }, 1000)
+            
+            // location.href = response.json()["room_id"]
+           // window.location.href = '/rooms';
+        } catch (error) {
+            alert('Une erreur s\'est produite');
+        }
+    });
+    document.querySelectorAll('.join-room').forEach(link => {
+        link.addEventListener('click', function() {
+            const roomElement = this.closest('.room');
+            const roomId = roomElement.querySelector('h2').innerText.split(' ').pop();
+            window.location.href = `/rooms/${roomId}`;
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block styles %}
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-image: url("/static/loginbg.png");
+        background-repeat: no-repeat;
+        background-size: cover;
+        color: #e0e0e0;
+        /* font-family: Arial, sans-serif; */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="text-bg-dark p-5 rounded-4">
+    <h1 class="position-relative top-0 start-50 translate-middle">Créer mon compte</h1>
+    <form class="row g-3" id="registerForm">
+        <div class="col-md-6">
+            <label for="inputFirstN" class="form-label">Prénom</label>
+            <input type="text" name="firstname" class="form-control" id="inputFirstN">
+          </div>
+        <div class="col-md-6">
+            <label for="inputName" class="form-label">Nom</label>
+            <input type="text" name="name" class="form-control" id="inputName">
+          </div>
+        <div class="col-md-6">
+          <label for="inputEmail4" class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" id="inputEmail4">
+        </div>
+        <div class="col-md-6">
+          <label for="inputPassword4" class="form-label">Password</label>
+          <input type="password" name="password" class="form-control" id="inputPassword4">
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Créer mon compte</button>
+        </div>
+      </form>
+</div>
+
+
+<script>
+    if (document.cookie.split(';').some((item) => item.trim().startsWith('authtoken='))) {
+        window.location.href = '/rooms';
+    }
+</script>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const params = new URLSearchParams(formData).toString();
+        
+        try {
+            const response = await fetch(`/transmitregister?${params}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la connexion');
+            }
+
+            window.location.href = '/rooms';
+        } catch (error) {
+            alert('Échec de la connexion. Vérifiez vos identifiants.');
+        }
+    });
+</script>
+{% endblock %}

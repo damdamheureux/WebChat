@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+    :root {
+        --background-dark: #1a1a1a;
+        --card-dark: #2d2d2d;
+        --chat-color: #8e9ba7;
+        --border-dark: #3d3d3d;
+        --text-light: #e0e0e0;
+        --accent-color: #f26522;
+        --transition-speed: 0.3s;
+    }
+
+    body {
+        background-color: var(--background-dark);
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    h1 {
+        color: var(--accent-color);
+        margin: 16px;
+    }
+
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 32px);
+        padding: 16px;
+        box-sizing: border-box;
+    }
+
+    .chat-box {
+        background-color: var(--card-dark);
+        border: 1px solid var(--border-dark);
+        flex: 1;
+        padding: 8px;
+        margin: 0 16px;
+        overflow-y: auto;
+        color: var(--text-light);
+        border-radius: 4px;
+    }
+
+    #message-form {
+        display: flex;
+        gap: 8px;
+        padding: 16px;
+        background-color: var(--background-dark);
+        position: sticky;
+        bottom: 0;
+    }
+
+    /* Conserver les styles existants modifiés */
+    .chat-box::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chat-box::-webkit-scrollbar-track {
+        background: var(--card-dark);
+    }
+
+    .chat-box::-webkit-scrollbar-thumb {
+        background: var(--accent-color);
+        border-radius: 4px;
+    }
+
+    .message-input {
+        width: 100%;
+        padding: 8px;
+        background-color: var(--card-dark);
+        border: 1px solid var(--border-dark);
+        color: var(--text-light);
+        border-radius: 4px;
+        transition: border-color var(--transition-speed) ease;
+    }
+
+    .send-button {
+        padding: 8px 20px;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: 
+            background-color var(--transition-speed) ease,
+            transform var(--transition-speed) ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="d-flex">
+        <h1>Vous êtes dans la salle {{roomid}}</h1>
+        <button class="btn btn-danger p-2 m-4" id="leaveroom">Quitter la salle</button>
+
+    </div>
+    <div>
+
+    </div>
+    <div class="chat-box" id="chatbox">
+        {% for message in messages %}
+        <div>
+            <h4>{{message["author"]["firstname"]}} {{message["author"]["name"]}}{% if isAdmin %}<span class="badge rounded-pill text-bg-light"> ID de message: {{message["id"]}}</span> {% endif %}</h4>
+            <p>{{message["content"]}}</p>
+        </div>
+        {% endfor %}
+    </div>
+    <form id="message-form">
+        <input type="text" id="message-input" name="content" class="message-input" maxlength="255" placeholder="Type your message here..." required>
+        <button type="submit" class="send-button" id="sendbutton">Send</button>
+    </form>
+</div>
+
+<script>
+    function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+    document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+
+    const socket = new WebSocket(`{{wsurl}}/ws/keepalive?authtoken=${getCookie("authtoken")}`);
+
+    socket.onmessage = function(event) {
+        //alert("j'ai recu " + event.data);
+        location.reload(); // En théorie, on devrait rester sur une analyse du ws mais pour le coup on a juste besoin du WS pour update en cas de message
+    };
+
+    socket.onclose = function(event) {
+        console.error('WebSocket closed');
+        console.log(event)
+    };
+    document.getElementById("leaveroom").addEventListener('click', async function(event){
+        try {
+            const response = await fetch(`/leave_room?roomid={{roomid}}`, {
+                method: 'GET',
+                credentials: 'include' 
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la connexion');
+            }
+            
+            // console.log('Connexion réussie, cookie enregistré');
+            window.location.reload();
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            // Il peut y avoir une erreur lors de l'envoi puisqu'on reload direct la page.
+            //alert('Une erreur est survenue, réesayez plus tard.');
+        }
+    });
+    document.getElementById('message-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const sendButton = document.getElementById('sendbutton');
+        sendButton.disabled = true;
+        const messageInput = document.getElementById('message-input');
+        const formData = new FormData(this);
+        const params = new URLSearchParams(formData).toString();
+        console.log(params, location.pathname)
+        try {
+            const response = await fetch(`${location.pathname}/sendmessage?${params}`, {
+                method: 'GET',
+                credentials: 'include' 
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la connexion');
+            }
+            socket.send("nouveaumessage") // (optionnel en vrai)
+            // console.log('Connexion réussie, cookie enregistré');
+            //window.location.reload();
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            // Il peut y avoir une erreur lors de l'envoi puisqu'on reload direct la page.
+            //alert('Une erreur est survenue, réesayez plus tard.');
+        }
+    });
+</script>
+{% endblock %}
