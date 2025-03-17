@@ -13,64 +13,102 @@ EvoCelestial est une application de 💬 chat permettant aux 👥 utilisateurs d
 
 ### 🛠️ Étapes d'installation
 
-1. **📥 Cloner les dépôts**
-   ```sh
-   git clone https://github.com/EvoCelestial/backend
-   git clone https://github.com/EvoCelestial/FrontEnd
-   ```
-2. **🔧 Créer l'image Docker et la lancer 🐋**
-   ```sh
-   cd backend
-   docker image -t backend:latest .
-   docker run -d \
-   ```
-   ```sh
-     --name backend_container \
-     -e DB_HOST=82.65.174.2 \
-     -e DB_NAME=default \
-     -e DB_PASSWORD=xj9Yvh7vvDCx7O9vHBa9Gihxl0nBNzuDRkOODxz8P2H9DFxBqxJs5RGQnPamnbYN \
-     -e DB_PORT=15800 \
-     -e DB_USER=root \
-     -e PRIVATE_fastapi_token=Pa$$wd \
-     -p 8000:8000 \
-     backend:latest
-   ```
+#### 1. 📥 Cloner les dépôts
+```sh
+git clone https://github.com/EvoCelestial/backend
+git clone https://github.com/EvoCelestial/FrontEnd
+```
 
-   ```sh
-      cd frontend
-      docker image -t frontend:latest .
-      docker run -d \
-      --name frontend_coontainer \
-      -e API_URL=localhost:8000 \
-      -p 40120:40120 \
-       frontend:latest
-   ```
-   **Sans docker**
-   ```sh
-      cd backend
-      pip3 install -r requirements.txt
-      touch .env
-      nano .env
-      fastapi dev main.py
-   ```
+#### 2. 🔧 Construire et exécuter le backend 🐋
+Assurez-vous d'être dans le dossier `backend` :
+```sh
+cd backend
+```
+Construire l'image Docker du backend :
+```sh
+docker build -t backend:latest .
+```
+Exécuter le conteneur avec les variables d'environnement :
+```sh
+docker run -d \
+  --name backend_container \
+  -e DB_HOST=82.65.174.2 \
+  -e DB_NAME=default \
+  -e DB_PASSWORD=xj9Yvh7vvDCx7O9vHBa9Gihxl0nBNzuDRkOODxz8P2H9DFxBqxJs5RGQnPamnbYN \
+  -e DB_PORT=15800 \
+  -e DB_USER=root \
+  -e PRIVATE_fastapi_token=Pa$$wd \
+  -p 8000:8000 \
+  backend:latest
+```
 
-   ```sh
-      cd frontend
-      pip3 install -r requirements.txt
-      touch .env
-      nano .env
-      python3 main.py
-   ```
-⚠️ Penser à bien mettre les bonnes valeurs dans les variables d'environnement.
+#### 3. 🔧 Construire et exécuter le frontend 🐋
+Naviguez dans le dossier `frontend` :
+```sh
+cd ../frontend
+```
+Construire l'image Docker du frontend :
+```sh
+docker build -t frontend:latest .
+```
+Exécuter le conteneur :
+```sh
+docker run -d \
+  --name frontend_container \
+  -e API_URL=http://localhost:8000 \
+  -p 40120:40120 \
+  frontend:latest
+```
 
-3. **⚙️ Configurer l'application**
-   - 📄 Copier le fichier `.env.exemple` en `.env` et ajuster les ⚙️ variables selon votre environnement.
+#### 4. ⚡ Exécution sans Docker
+Si vous souhaitez exécuter le projet sans Docker, suivez ces étapes :
 
+**Backend :**
+```sh
+cd backend
+pip3 install -r requirements.txt
+touch .env
+nano .env
+fastapi dev main.py
+```
 
+**Frontend :**
+```sh
+cd frontend
+pip3 install -r requirements.txt
+touch .env
+nano .env
+python3 main.py
+```
+⚠️ Pensez à bien configurer les variables d'environnement.
+
+#### 5. ⚙️ Configurer l'application
+- 📄 Copier le fichier `.env.exemple` en `.env` et ajuster les ⚙️ variables selon votre environnement.
+
+#### 6. ✅ Vérification
+- Vérifiez que les conteneurs tournent :
+  ```sh
+  docker ps
+  ```
+- Accédez à l'API backend sur [http://localhost:8000](http://localhost:8000)
+- Accédez à l'interface frontend sur [http://localhost:40120](http://localhost:40120)
+
+#### 7. 🛑 Arrêter et nettoyer les conteneurs
+Si vous souhaitez arrêter et supprimer les conteneurs, exécutez :
+```sh
+docker stop backend_container frontend_container
+docker rm backend_container frontend_container
+```
+
+Si vous souhaitez également supprimer les images Docker :
+```sh
+docker rmi backend:latest frontend:latest
+```
 
 ## 🛠️ Technologies utilisées
 
-- 🐍 Python (Flask et FastAPI)
+- 🐍 Python (FastAPI)
 - 🌐 WebSockets pour la communication en temps réel
-- 💻 Base de donnée MySQL
+- 💻 Base de données MySQL
 - 🐳 Docker pour la 📦 conteneurisation
+
