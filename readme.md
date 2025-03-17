@@ -1,4 +1,4 @@
-# 🚀 EvoCelestial - Backend 💻
+# 🚀 EvoCelestial 💻
 
 ## 📝 Description
 
